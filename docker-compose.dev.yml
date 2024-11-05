@@ -1,0 +1,7 @@
+services:
+  api:
+    build:
+      target: development
+    volumes:
+      - ./COMPONENTS/api:/app
+      - /app/pkg/mod
