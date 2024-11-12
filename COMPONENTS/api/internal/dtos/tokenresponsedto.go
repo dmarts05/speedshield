@@ -1,0 +1,6 @@
+package dtos
+
+type TokenResponseDto struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
+}

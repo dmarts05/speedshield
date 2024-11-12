@@ -14,7 +14,7 @@ import (
 
 // Holds all the necessary components to run the server.
 type Server struct {
-	db     *pgxpool.Pool
+	pool   *pgxpool.Pool
 	router *echo.Echo
 	cfg    config
 }
@@ -27,7 +27,7 @@ func New() (*Server, error) {
 	}
 
 	return &Server{
-		db:     nil,
+		pool:   nil,
 		router: echo.New(),
 		cfg:    cfg,
 	}, nil
@@ -46,18 +46,18 @@ func (s *Server) Start(ctx context.Context) error {
 		return nil
 	}
 
-	db, err := pgxpool.NewWithConfig(ctx, pgxConfig)
+	pool, err := pgxpool.NewWithConfig(ctx, pgxConfig)
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer pool.Close()
 
-	err = db.Ping(ctx)
+	err = pool.Ping(ctx)
 	if err != nil {
 		return err
 	}
 
-	s.db = db
+	s.pool = pool
 
 	// Router
 	s.router.HideBanner = true
