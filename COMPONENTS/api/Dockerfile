@@ -11,11 +11,14 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Development stage: adds air for live-reloading
+# Development stage: adds air for live-reloading and delve for debugging
 FROM base AS development
 
 # Install air for live-reloading
 RUN go install github.com/air-verse/air@latest
+
+# Install delve for debugging
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 # Command to run air in development mode
 CMD ["air"]
@@ -24,7 +27,6 @@ CMD ["air"]
 FROM base AS build
 
 # Build the Go application
-# RUN go build -o main .
 RUN go build -ldflags="-s -w" -o=speedshield-api ./cmd
 
 # Production stage: runs the compiled application

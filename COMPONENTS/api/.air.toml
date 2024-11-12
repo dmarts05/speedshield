@@ -12,7 +12,7 @@ exclude_file = []
 exclude_regex = ["_test.go"]
 exclude_unchanged = false
 follow_symlink = false
-full_bin = ""
+full_bin = "dlv exec --headless --listen=:2345 --log --api-version=2 --accept-multiclient ./tmp/speedshield-api"
 include_dir = []
 include_ext = ["go", "tpl", "tmpl", "html"]
 include_file = []
