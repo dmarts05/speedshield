@@ -1,0 +1,226 @@
+basePath: /api/v1
+definitions:
+  dtos.LoginRequestDto:
+    properties:
+      email:
+        example: johndoe@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dtos.LogoutRequestDto:
+    properties:
+      refresh_token:
+        example: 00000000-0000-0000-0000-000000000000
+        type: string
+    required:
+    - refresh_token
+    type: object
+  dtos.RefreshRequestDto:
+    properties:
+      refresh_token:
+        example: 00000000-0000-0000-0000-000000000000
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzE5NzA2MDQsInN1YiI6MX0.BUnMhHws6UdDCio_nyuUYQYkqWy_NwEmt6BZbA3ODk4
+        type: string
+    required:
+    - refresh_token
+    - token
+    type: object
+  dtos.RegisterRequestDto:
+    properties:
+      email:
+        example: johndoe@example.com
+        type: string
+      password:
+        example: password123
+        maxLength: 32
+        minLength: 8
+        type: string
+      username:
+        example: johndoe
+        maxLength: 32
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  dtos.TokenResponseDto:
+    properties:
+      refresh_token:
+        example: 00000000-0000-0000-0000-000000000000
+        type: string
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzE5NzA2MDQsInN1YiI6MX0.BUnMhHws6UdDCio_nyuUYQYkqWy_NwEmt6BZbA3ODk4
+        type: string
+    type: object
+  echo.HTTPError:
+    properties:
+      message: {}
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: dmarts05@estudiantes.unileon.es
+    name: Daniel Martínez Sánchez
+    url: https://github.com/dmarts05
+  description: 'An API for managing Speedshield services: users, speedcameras, alerts...'
+  title: Speedshield API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user given the required information and returns authentication
+        tokens. Doesn't require authentication.
+      parameters:
+      - description: Login request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token and refresh token
+          schema:
+            $ref: '#/definitions/dtos.TokenResponseDto'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Logs in a user.
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out a user given the required information. Removing the refresh
+        token from the database.
+      parameters:
+      - description: Logout request
+        in: body
+        name: logoutRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LogoutRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Logs out a user.
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refreshes a user token given the required information and returns
+        a new authentication token. Doesn't require authentication.
+      parameters:
+      - description: Refresh request
+        in: body
+        name: refreshRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RefreshRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token
+          schema:
+            $ref: '#/definitions/dtos.TokenResponseDto'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Refreshes a user token.
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user given the required information and returns
+        authentication tokens. Doesn't require authentication.
+      parameters:
+      - description: Register request
+        in: body
+        name: registerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RegisterRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: JWT token and refresh token
+          schema:
+            $ref: '#/definitions/dtos.TokenResponseDto'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "409":
+          description: User already exists
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/echo.HTTPError'
+      summary: Registers a new user.
+      tags:
+      - auth
+schemes:
+- http
+- https
+securityDefinitions:
+  JWT:
+    description: JWT token for authentication. Please add it in the format "Bearer
+      {AccessToken}" to authorize your requests.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

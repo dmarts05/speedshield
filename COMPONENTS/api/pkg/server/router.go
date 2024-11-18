@@ -3,14 +3,17 @@ package server
 import (
 	"net/http"
 
-	"github.com/cdsacademy/cdsgarage/speedshield/internal/controllers"
-	"github.com/cdsacademy/cdsgarage/speedshield/internal/middlewares"
-	"github.com/cdsacademy/cdsgarage/speedshield/internal/services"
+	"github.com/dmarts05/speedshield/pkg/controllers"
+	"github.com/dmarts05/speedshield/pkg/middlewares"
+	"github.com/dmarts05/speedshield/pkg/services"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 // Loads all server routes.
 func (s *Server) loadRoutes() {
+	s.router.GET("/swagger/*", echoSwagger.WrapHandler)
+
 	g := s.router.Group("/api/v1")
 
 	g.GET("/health", func(c echo.Context) error {

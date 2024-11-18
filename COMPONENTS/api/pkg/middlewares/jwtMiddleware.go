@@ -3,8 +3,8 @@ package middlewares
 import (
 	"strings"
 
-	"github.com/cdsacademy/cdsgarage/speedshield/internal/exc"
-	"github.com/cdsacademy/cdsgarage/speedshield/internal/utils"
+	"github.com/dmarts05/speedshield/pkg/exc"
+	"github.com/dmarts05/speedshield/pkg/utils"
 	"github.com/labstack/echo/v4"
 )
 
