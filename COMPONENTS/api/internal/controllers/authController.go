@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/dtos"
+	"github.com/cdsacademy/cdsgarage/speedshield/internal/exc"
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/services"
 	"github.com/labstack/echo/v4"
 )
@@ -31,7 +34,7 @@ func (h *AuthController) Register(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(201, tokenResponse)
+	return c.JSON(http.StatusCreated, tokenResponse)
 }
 
 // Handles user login.
@@ -49,7 +52,7 @@ func (h *AuthController) Login(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, tokenResponse)
+	return c.JSON(http.StatusOK, tokenResponse)
 }
 
 // Handles token refresh.
@@ -67,10 +70,28 @@ func (h *AuthController) Refresh(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(200, tokenResponse)
+	return c.JSON(http.StatusOK, tokenResponse)
 }
 
 // Handles user logout.
 func (h *AuthController) Logout(c echo.Context) error {
-	return nil
+	userId, ok := c.Get("userId").(int)
+	if !ok {
+		return exc.InvalidCredentialsError()
+	}
+
+	logoutRequest := &dtos.LogoutRequestDto{}
+	if err := c.Bind(logoutRequest); err != nil {
+		return err
+	}
+	if err := c.Validate(logoutRequest); err != nil {
+		return err
+	}
+
+	err := h.authService.Logout(int(userId), *logoutRequest)
+	if err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
 }

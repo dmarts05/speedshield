@@ -8,13 +8,13 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+var jwtSecretKey = []byte(os.Getenv("JWT_SECRET"))
 
 // Creates a JWT for a user with the given user ID
-func GenerateToken(id int) (string, error) {
+func GenerateToken(sub int) (string, error) {
 	// Create token claims with an expiration time
 	claims := jwt.MapClaims{
-		"id":  id,
+		"sub": sub,
 		"exp": time.Now().Add(JwtExpirationTime).Unix(),
 	}
 
@@ -37,11 +37,11 @@ func VerifyToken(tokenString string) (int, error) {
 
 	// Check the token claims
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		id, ok := claims["id"].(float64) // Claims stores numbers as float64
+		sub, ok := claims["sub"].(float64) // Claims stores numbers as float64
 		if !ok {
-			return 0, errors.New("invalid id in token")
+			return 0, errors.New("invalid sub in token")
 		}
-		return int(id), nil
+		return int(sub), nil
 	}
 
 	return 0, errors.New("invalid token")
@@ -61,11 +61,11 @@ func VerifyTokenWithoutClaimValidation(tokenString string) (int, error) {
 
 	// Check the token claims
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		id, ok := claims["id"].(float64) // Claims stores numbers as float64
+		sub, ok := claims["sub"].(float64) // Claims stores numbers as float64
 		if !ok {
-			return 0, errors.New("invalid id in token")
+			return 0, errors.New("invalid sub in token")
 		}
-		return int(id), nil
+		return int(sub), nil
 	}
 
 	return 0, errors.New("invalid token")

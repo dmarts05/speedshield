@@ -11,6 +11,7 @@ SELECT EXISTS(
         SELECT 1
         FROM refresh_tokens
         WHERE id = $1::uuid
+            AND expiry_date > NOW()
     );
 -- name: DeleteRefreshTokenById :exec
 DELETE FROM refresh_tokens

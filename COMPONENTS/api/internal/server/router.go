@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/controllers"
+	"github.com/cdsacademy/cdsgarage/speedshield/internal/middlewares"
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/services"
 	"github.com/labstack/echo/v4"
 )
@@ -23,4 +24,8 @@ func (s *Server) loadRoutes() {
 	authGroup.POST("/register", authController.Register)
 	authGroup.POST("/login", authController.Login)
 	authGroup.POST("/refresh", authController.Refresh)
+
+	// -- Token Required ---
+	authGroup.Use(middlewares.JwtMiddleware)
+	authGroup.POST("/logout", authController.Logout)
 }

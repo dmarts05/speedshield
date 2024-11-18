@@ -43,7 +43,7 @@ func (s *AuthService) Register(registerRequest dtos.RegisterRequestDto) (dtos.To
 	qtx := s.queries.WithTx(tx)
 
 	// Check if user already exists
-	exists, err := qtx.DoesUserAlreadyExist(ctx, db.DoesUserAlreadyExistParams{
+	exists, err := qtx.DoesUserExist(ctx, db.DoesUserExistParams{
 		Username: registerRequest.Username,
 		Email:    registerRequest.Email,
 	})
@@ -91,9 +91,9 @@ func (s *AuthService) Login(loginRequest dtos.LoginRequestDto) (dtos.TokenRespon
 	defer cancel()
 
 	// Check if user exists
-	exists, err := s.queries.DoesUserAlreadyExist(
+	exists, err := s.queries.DoesUserExist(
 		ctx,
-		db.DoesUserAlreadyExistParams{
+		db.DoesUserExistParams{
 			Username: "",
 			Email:    loginRequest.Email,
 		},
@@ -121,7 +121,7 @@ func (s *AuthService) Login(loginRequest dtos.LoginRequestDto) (dtos.TokenRespon
 }
 
 // Handles token refresh.
-func (s *AuthService) Refresh(refreshTokenRequest dtos.RefreshRequestDto) (dtos.TokenResponseDto, *echo.HTTPError) {
+func (s *AuthService) Refresh(refreshRequest dtos.RefreshRequestDto) (dtos.TokenResponseDto, *echo.HTTPError) {
 	// Create context with timeout
 	ctx, cancel := utils.TimeoutContext()
 	defer cancel()
@@ -136,13 +136,13 @@ func (s *AuthService) Refresh(refreshTokenRequest dtos.RefreshRequestDto) (dtos.
 	qtx := s.queries.WithTx(tx)
 
 	// Check if token is valid. It is important to acknowledge that the token is valid even if the expiration date is in the past
-	userId, err := utils.VerifyTokenWithoutClaimValidation(refreshTokenRequest.Token)
+	userId, err := utils.VerifyTokenWithoutClaimValidation(refreshRequest.Token)
 	if err != nil {
 		return dtos.TokenResponseDto{}, exc.InvalidCredentialsError()
 	}
 
 	// Check if refresh token is valid
-	refreshTokenUUID, err := uuid.Parse(refreshTokenRequest.RefreshToken)
+	refreshTokenUUID, err := uuid.Parse(refreshRequest.RefreshToken)
 	if err != nil {
 		return dtos.TokenResponseDto{}, exc.InvalidCredentialsError()
 	}
@@ -173,6 +173,34 @@ func (s *AuthService) Refresh(refreshTokenRequest dtos.RefreshRequestDto) (dtos.
 	}
 
 	return tokenResponse, nil
+}
+
+// Handles user logout.
+func (s *AuthService) Logout(userId int, logoutRequest dtos.LogoutRequestDto) *echo.HTTPError {
+	// Create context with timeout
+	ctx, cancel := utils.TimeoutContext()
+	defer cancel()
+
+	// Check if refresh token is valid
+	refreshTokenUUID, err := uuid.Parse(logoutRequest.RefreshToken)
+	if err != nil {
+		return exc.InvalidCredentialsError()
+	}
+	exists, err := s.queries.DoesRefreshTokenExist(ctx, refreshTokenUUID)
+	if err != nil {
+		return exc.DbGenericError()
+	}
+	if !exists {
+		return exc.InvalidCredentialsError()
+	}
+
+	// Remove refresh token
+	err = s.queries.DeleteRefreshTokenById(ctx, refreshTokenUUID)
+	if err != nil {
+		return exc.DbGenericError()
+	}
+
+	return nil
 }
 
 // Helper to create tokens and insert refresh token, supporting transactions.

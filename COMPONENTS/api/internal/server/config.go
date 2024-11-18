@@ -9,8 +9,9 @@ import (
 
 // Includes the necessary configuration to run the server.
 type config struct {
-	dbURI string
-	port  int
+	dbURI     string
+	port      int
+	jwtSecret []byte
 }
 
 // Loads the configuration from the environment variables.
@@ -43,8 +44,14 @@ func loadConfig() (config, error) {
 		return config{}, err
 	}
 
+	jwtSecret, ok := os.LookupEnv("JWT_SECRET")
+	if !ok {
+		return config{}, errors.New("JWT_SECRET environment variable is not set")
+	}
+
 	return config{
-		dbURI: dbURI,
-		port:  port,
+		dbURI:     dbURI,
+		port:      port,
+		jwtSecret: []byte(jwtSecret),
 	}, nil
 }

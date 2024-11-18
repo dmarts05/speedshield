@@ -24,7 +24,7 @@ SELECT id,
     modified_at
 FROM users
 WHERE email = $1;
--- name: DoesUserAlreadyExist :one
+-- name: DoesUserExist :one
 SELECT EXISTS (
         SELECT 1
         FROM users

@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const doesUserAlreadyExist = `-- name: DoesUserAlreadyExist :one
+const doesUserExist = `-- name: DoesUserExist :one
 SELECT EXISTS (
         SELECT 1
         FROM users
@@ -21,13 +21,13 @@ SELECT EXISTS (
     )
 `
 
-type DoesUserAlreadyExistParams struct {
+type DoesUserExistParams struct {
 	Username string
 	Email    string
 }
 
-func (q *Queries) DoesUserAlreadyExist(ctx context.Context, arg DoesUserAlreadyExistParams) (bool, error) {
-	row := q.db.QueryRow(ctx, doesUserAlreadyExist, arg.Username, arg.Email)
+func (q *Queries) DoesUserExist(ctx context.Context, arg DoesUserExistParams) (bool, error) {
+	row := q.db.QueryRow(ctx, doesUserExist, arg.Username, arg.Email)
 	var exists bool
 	err := row.Scan(&exists)
 	return exists, err
