@@ -1,6 +1,5 @@
 DELETE FROM speedcameras_types
-WHERE
-    name IN (
+WHERE name IN (
         'Área Prioridad Residencial',
         'Cámara Control uso Móvil/Cinturón',
         'Camuflados',

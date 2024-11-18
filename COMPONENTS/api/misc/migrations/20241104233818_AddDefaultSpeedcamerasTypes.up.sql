@@ -1,7 +1,5 @@
-INSERT INTO
-    speedcameras_types (name)
-VALUES
-    ('Área Prioridad Residencial'),
+INSERT INTO speedcameras_types (name)
+VALUES ('Área Prioridad Residencial'),
     ('Cámara Control uso Móvil/Cinturón'),
     ('Camuflados'),
     ('Fijos'),

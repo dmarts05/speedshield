@@ -22,4 +22,5 @@ func (s *Server) loadRoutes() {
 	authGroup := g.Group("/auth")
 	authGroup.POST("/register", authController.Register)
 	authGroup.POST("/login", authController.Login)
+	authGroup.POST("/refresh", authController.Refresh)
 }

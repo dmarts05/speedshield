@@ -1,3 +1,2 @@
 DELETE FROM speedcameras_sources
-WHERE
-    name IN ('LaRadioBBS', 'Ahora León', 'User');
+WHERE name IN ('LaRadioBBS', 'Ahora León', 'User');

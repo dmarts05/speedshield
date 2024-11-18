@@ -9,7 +9,6 @@ import (
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/exc"
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/utils"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 )
@@ -72,7 +71,7 @@ func (s *AuthService) Register(registerRequest dtos.RegisterRequestDto) (dtos.To
 	}
 
 	// Generate token and refresh token
-	tokenResponse, httpErr := s.generateTokens(ctx, qtx, user.ID)
+	tokenResponse, httpErr := s.generateTokens(ctx, qtx, int(user.ID))
 	if httpErr != nil {
 		return dtos.TokenResponseDto{}, httpErr
 	}
@@ -118,25 +117,76 @@ func (s *AuthService) Login(loginRequest dtos.LoginRequestDto) (dtos.TokenRespon
 	}
 
 	// Generate token and refresh token
-	return s.generateTokens(ctx, s.queries, user.ID)
+	return s.generateTokens(ctx, s.queries, int(user.ID))
+}
+
+// Handles token refresh.
+func (s *AuthService) Refresh(refreshTokenRequest dtos.RefreshRequestDto) (dtos.TokenResponseDto, *echo.HTTPError) {
+	// Create context with timeout
+	ctx, cancel := utils.TimeoutContext()
+	defer cancel()
+
+	// Start transaction
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+	defer tx.Rollback(ctx) // nolint: errcheck
+
+	qtx := s.queries.WithTx(tx)
+
+	// Check if token is valid. It is important to acknowledge that the token is valid even if the expiration date is in the past
+	userId, err := utils.VerifyTokenWithoutClaimValidation(refreshTokenRequest.Token)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.InvalidCredentialsError()
+	}
+
+	// Check if refresh token is valid
+	refreshTokenUUID, err := uuid.Parse(refreshTokenRequest.RefreshToken)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.InvalidCredentialsError()
+	}
+	exists, err := qtx.DoesRefreshTokenExist(ctx, refreshTokenUUID)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+	if !exists {
+		return dtos.TokenResponseDto{}, exc.InvalidCredentialsError()
+	}
+
+	// Generate token and refresh token
+	tokenResponse, httpErr := s.generateTokens(ctx, qtx, userId)
+	if httpErr != nil {
+		return dtos.TokenResponseDto{}, httpErr
+	}
+
+	// Remove old refresh token
+	err = qtx.DeleteRefreshTokenById(ctx, refreshTokenUUID)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+
+	// Commit transaction
+	err = tx.Commit(ctx)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+
+	return tokenResponse, nil
 }
 
 // Helper to create tokens and insert refresh token, supporting transactions.
-func (s *AuthService) generateTokens(ctx context.Context, q *db.Queries, userID int32) (dtos.TokenResponseDto, *echo.HTTPError) {
+func (s *AuthService) generateTokens(ctx context.Context, q *db.Queries, userID int) (dtos.TokenResponseDto, *echo.HTTPError) {
 	// Generate token
-	token, err := utils.GenerateToken(int(userID))
+	token, err := utils.GenerateToken(userID)
 	if err != nil {
 		return dtos.TokenResponseDto{}, exc.GenericError("Error generating token")
 	}
 
 	// Insert refresh token
 	refreshToken, err := q.InsertRefreshToken(ctx, db.InsertRefreshTokenParams{
-		Token:  uuid.New().String(),
-		UserID: userID,
-		ExpiryDate: pgtype.Timestamp{
-			Time:  time.Now().Add(utils.RefreshTokenExpirationTime),
-			Valid: true,
-		},
+		UserID:     int32(userID),
+		ExpiryDate: time.Now().Add(utils.RefreshTokenExpirationTime),
 	})
 	if err != nil {
 		return dtos.TokenResponseDto{}, exc.DbGenericError()
@@ -145,6 +195,6 @@ func (s *AuthService) generateTokens(ctx context.Context, q *db.Queries, userID 
 	// Return tokens
 	return dtos.TokenResponseDto{
 		Token:        token,
-		RefreshToken: refreshToken.Token,
+		RefreshToken: refreshToken.ID.String(),
 	}, nil
 }

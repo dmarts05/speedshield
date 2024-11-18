@@ -1,2 +1,1 @@
-CREATE TABLE
-    speedcameras_types (id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE);
+CREATE TABLE speedcameras_types (id SERIAL PRIMARY KEY, name TEXT NOT NULL UNIQUE);

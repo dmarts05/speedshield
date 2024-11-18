@@ -1,6 +1,8 @@
 services:
   db:
-    image: postgres:17-alpine
+    build:
+      context: ./COMPONENTS/db
+      dockerfile: Dockerfile
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -9,6 +11,11 @@ services:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
       - data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   migrate:
     image: migrate/migrate:4
@@ -18,7 +25,8 @@ services:
     volumes:
       - ./COMPONENTS/api/misc/migrations:/migrations
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   api:
     build:

@@ -5,16 +5,18 @@
 package db
 
 import (
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type RefreshToken struct {
-	ID         int32
-	Token      string
-	ExpiryDate pgtype.Timestamp
+	ID         uuid.UUID
+	ExpiryDate time.Time
 	UserID     int32
-	CreatedAt  pgtype.Timestamp
-	ModifiedAt pgtype.Timestamp
+	CreatedAt  time.Time
+	ModifiedAt pgtype.Timestamptz
 }
 
 type Speedcamera struct {
@@ -27,10 +29,10 @@ type Speedcamera struct {
 	Direction           pgtype.Int4
 	LocationDescription pgtype.Text
 	Source              int32
-	Expiration          pgtype.Timestamp
+	Expiration          pgtype.Timestamptz
 	CreatedBy           pgtype.Int4
-	CreatedAt           pgtype.Timestamp
-	ModifiedAt          pgtype.Timestamp
+	CreatedAt           time.Time
+	ModifiedAt          pgtype.Timestamptz
 }
 
 type SpeedcamerasSource struct {
@@ -48,8 +50,8 @@ type User struct {
 	Username     string
 	Email        string
 	PasswordHash string
-	CreatedAt    pgtype.Timestamp
-	ModifiedAt   pgtype.Timestamp
+	CreatedAt    time.Time
+	ModifiedAt   pgtype.Timestamptz
 }
 
 type UserVote struct {
@@ -57,6 +59,6 @@ type UserVote struct {
 	UserID        int32
 	SpeedcameraID int32
 	VoteType      string
-	CreatedAt     pgtype.Timestamp
-	ModifiedAt    pgtype.Timestamp
+	CreatedAt     time.Time
+	ModifiedAt    pgtype.Timestamptz
 }

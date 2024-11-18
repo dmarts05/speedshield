@@ -30,13 +30,7 @@ func GenerateToken(id int) (string, error) {
 // Verifies a JWT and extracts the user ID if valid
 func VerifyToken(tokenString string) (int, error) {
 	// Parse the token with claims
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Validate the signing method
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid signing method")
-		}
-		return jwtSecretKey, nil
-	})
+	token, err := jwt.Parse(tokenString, keyFunc)
 	if err != nil {
 		return 0, err
 	}
@@ -49,5 +43,39 @@ func VerifyToken(tokenString string) (int, error) {
 		}
 		return int(id), nil
 	}
+
 	return 0, errors.New("invalid token")
+}
+
+func VerifyTokenWithoutClaimValidation(tokenString string) (int, error) {
+	// Create custom parser that skips claims validation
+	parser := &jwt.Parser{
+		SkipClaimsValidation: true,
+	}
+
+	// Parse the token with custom parser
+	token, err := parser.Parse(tokenString, keyFunc)
+	if err != nil {
+		return 0, err
+	}
+
+	// Check the token claims
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		id, ok := claims["id"].(float64) // Claims stores numbers as float64
+		if !ok {
+			return 0, errors.New("invalid id in token")
+		}
+		return int(id), nil
+	}
+
+	return 0, errors.New("invalid token")
+}
+
+// Helper that validates the signing method of a token. It must be HMAC.
+func keyFunc(token *jwt.Token) (interface{}, error) {
+	// Validate the signing method
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, errors.New("invalid signing method")
+	}
+	return jwtSecretKey, nil
 }

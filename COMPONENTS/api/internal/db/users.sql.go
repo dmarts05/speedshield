@@ -7,17 +7,18 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const doesUserAlreadyExist = `-- name: DoesUserAlreadyExist :one
 SELECT EXISTS (
-    SELECT 1
-    FROM users
-    WHERE username = $1
-    OR email = $2
-)
+        SELECT 1
+        FROM users
+        WHERE username = $1
+            OR email = $2
+    )
 `
 
 type DoesUserAlreadyExistParams struct {
@@ -33,7 +34,12 @@ func (q *Queries) DoesUserAlreadyExist(ctx context.Context, arg DoesUserAlreadyE
 }
 
 const findUserByEmail = `-- name: FindUserByEmail :one
-SELECT id, username, email, password_hash, created_at, modified_at
+SELECT id,
+    username,
+    email,
+    password_hash,
+    created_at,
+    modified_at
 FROM users
 WHERE email = $1
 `
@@ -53,7 +59,12 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, erro
 }
 
 const findUserById = `-- name: FindUserById :one
-SELECT id, username, email, password_hash, created_at, modified_at
+SELECT id,
+    username,
+    email,
+    password_hash,
+    created_at,
+    modified_at
 FROM users
 WHERE id = $1
 `
@@ -73,15 +84,13 @@ func (q *Queries) FindUserById(ctx context.Context, id int32) (User, error) {
 }
 
 const insertUser = `-- name: InsertUser :one
-INSERT INTO users
-(
+INSERT INTO users (username, email, password_hash)
+VALUES ($1, $2, $3)
+RETURNING id,
     username,
     email,
-    password_hash
-)
-VALUES
-($1, $2, $3)
-RETURNING id, username, email, created_at, modified_at
+    created_at,
+    modified_at
 `
 
 type InsertUserParams struct {
@@ -94,8 +103,8 @@ type InsertUserRow struct {
 	ID         int32
 	Username   string
 	Email      string
-	CreatedAt  pgtype.Timestamp
-	ModifiedAt pgtype.Timestamp
+	CreatedAt  time.Time
+	ModifiedAt pgtype.Timestamptz
 }
 
 func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (InsertUserRow, error) {

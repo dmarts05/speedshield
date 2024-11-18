@@ -54,7 +54,20 @@ func (h *AuthController) Login(c echo.Context) error {
 
 // Handles token refresh.
 func (h *AuthController) Refresh(c echo.Context) error {
-	return nil
+	refreshRequest := &dtos.RefreshRequestDto{}
+	if err := c.Bind(&refreshRequest); err != nil {
+		return err
+	}
+	if err := c.Validate(refreshRequest); err != nil {
+		return err
+	}
+
+	tokenResponse, err := h.authService.Refresh(*refreshRequest)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(200, tokenResponse)
 }
 
 // Handles user logout.

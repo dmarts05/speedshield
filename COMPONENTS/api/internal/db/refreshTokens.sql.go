@@ -7,43 +7,65 @@ package db
 
 import (
 	"context"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const deleteRefreshTokenById = `-- name: DeleteRefreshTokenById :exec
+DELETE FROM refresh_tokens
+WHERE id = $1::uuid
+`
+
+func (q *Queries) DeleteRefreshTokenById(ctx context.Context, dollar_1 uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteRefreshTokenById, dollar_1)
+	return err
+}
+
+const doesRefreshTokenExist = `-- name: DoesRefreshTokenExist :one
+SELECT EXISTS(
+        SELECT 1
+        FROM refresh_tokens
+        WHERE id = $1::uuid
+    )
+`
+
+func (q *Queries) DoesRefreshTokenExist(ctx context.Context, dollar_1 uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, doesRefreshTokenExist, dollar_1)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const insertRefreshToken = `-- name: InsertRefreshToken :one
-INSERT INTO refresh_tokens
-(
-    token,
+INSERT INTO refresh_tokens (user_id, expiry_date)
+VALUES ($1, $2)
+RETURNING id,
     user_id,
-    expiry_date
-)
-VALUES
-($1, $2, $3)
-RETURNING id, token, user_id, expiry_date, created_at, modified_at
+    expiry_date,
+    created_at,
+    modified_at
 `
 
 type InsertRefreshTokenParams struct {
-	Token      string
 	UserID     int32
-	ExpiryDate pgtype.Timestamp
+	ExpiryDate time.Time
 }
 
 type InsertRefreshTokenRow struct {
-	ID         int32
-	Token      string
+	ID         uuid.UUID
 	UserID     int32
-	ExpiryDate pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	ModifiedAt pgtype.Timestamp
+	ExpiryDate time.Time
+	CreatedAt  time.Time
+	ModifiedAt pgtype.Timestamptz
 }
 
 func (q *Queries) InsertRefreshToken(ctx context.Context, arg InsertRefreshTokenParams) (InsertRefreshTokenRow, error) {
-	row := q.db.QueryRow(ctx, insertRefreshToken, arg.Token, arg.UserID, arg.ExpiryDate)
+	row := q.db.QueryRow(ctx, insertRefreshToken, arg.UserID, arg.ExpiryDate)
 	var i InsertRefreshTokenRow
 	err := row.Scan(
 		&i.ID,
-		&i.Token,
 		&i.UserID,
 		&i.ExpiryDate,
 		&i.CreatedAt,
