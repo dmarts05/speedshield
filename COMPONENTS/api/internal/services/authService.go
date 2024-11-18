@@ -13,11 +13,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Service for authentication.
 type AuthService struct {
 	pool    *pgxpool.Pool
 	queries *db.Queries
 }
 
+// Creates a new instance of AuthService.
 func NewAuthService(pool *pgxpool.Pool) *AuthService {
 	return &AuthService{
 		pool:    pool,
@@ -25,6 +27,7 @@ func NewAuthService(pool *pgxpool.Pool) *AuthService {
 	}
 }
 
+// Handles the registration of a new user.
 func (s *AuthService) Register(registerRequest dtos.RegisterRequestDto) (dtos.TokenResponseDto, *echo.HTTPError) {
 	// Create context with timeout
 	ctx, cancel := utils.TimeoutContext()

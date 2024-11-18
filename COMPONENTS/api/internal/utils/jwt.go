@@ -8,7 +8,6 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-// Define your secret key
 var jwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 // Creates a JWT for a user with the given user ID
