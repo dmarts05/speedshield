@@ -32,6 +32,26 @@ func (q *Queries) DoesUserAlreadyExist(ctx context.Context, arg DoesUserAlreadyE
 	return exists, err
 }
 
+const findUserByEmail = `-- name: FindUserByEmail :one
+SELECT id, username, email, password_hash, created_at, modified_at
+FROM users
+WHERE email = $1
+`
+
+func (q *Queries) FindUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, findUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.ModifiedAt,
+	)
+	return i, err
+}
+
 const findUserById = `-- name: FindUserById :one
 SELECT id, username, email, password_hash, created_at, modified_at
 FROM users

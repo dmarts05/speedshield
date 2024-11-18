@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"time"
 
 	"github.com/cdsacademy/cdsgarage/speedshield/internal/db"
@@ -71,13 +72,67 @@ func (s *AuthService) Register(registerRequest dtos.RegisterRequestDto) (dtos.To
 	}
 
 	// Generate token and refresh token
-	token, err := utils.GenerateToken(int(user.ID))
+	tokenResponse, httpErr := s.generateTokens(ctx, qtx, user.ID)
+	if httpErr != nil {
+		return dtos.TokenResponseDto{}, httpErr
+	}
+
+	// Commit transaction
+	err = tx.Commit(ctx)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+
+	return tokenResponse, nil
+}
+
+func (s *AuthService) Login(loginRequest dtos.LoginRequestDto) (dtos.TokenResponseDto, *echo.HTTPError) {
+	// Create context with timeout
+	ctx, cancel := utils.TimeoutContext()
+	defer cancel()
+
+	// Check if user exists
+	exists, err := s.queries.DoesUserAlreadyExist(
+		ctx,
+		db.DoesUserAlreadyExistParams{
+			Username: "",
+			Email:    loginRequest.Email,
+		},
+	)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+	if !exists {
+		return dtos.TokenResponseDto{}, exc.UserNotFoundError()
+	}
+
+	// Get user by email
+	user, err := s.queries.FindUserByEmail(ctx, loginRequest.Email)
+	if err != nil {
+		return dtos.TokenResponseDto{}, exc.DbGenericError()
+	}
+
+	// Check password
+	if !utils.CheckPassword(user.PasswordHash, loginRequest.Password) {
+		return dtos.TokenResponseDto{}, exc.InvalidCredentialsError()
+	}
+
+	// Generate token and refresh token
+	return s.generateTokens(ctx, s.queries, user.ID)
+}
+
+// Helper to create tokens and insert refresh token, supporting transactions.
+func (s *AuthService) generateTokens(ctx context.Context, q *db.Queries, userID int32) (dtos.TokenResponseDto, *echo.HTTPError) {
+	// Generate token
+	token, err := utils.GenerateToken(int(userID))
 	if err != nil {
 		return dtos.TokenResponseDto{}, exc.GenericError("Error generating token")
 	}
-	refreshToken, err := qtx.InsertRefreshToken(ctx, db.InsertRefreshTokenParams{
+
+	// Insert refresh token
+	refreshToken, err := q.InsertRefreshToken(ctx, db.InsertRefreshTokenParams{
 		Token:  uuid.New().String(),
-		UserID: user.ID,
+		UserID: userID,
 		ExpiryDate: pgtype.Timestamp{
 			Time:  time.Now().Add(utils.RefreshTokenExpirationTime),
 			Valid: true,
@@ -87,13 +142,7 @@ func (s *AuthService) Register(registerRequest dtos.RegisterRequestDto) (dtos.To
 		return dtos.TokenResponseDto{}, exc.DbGenericError()
 	}
 
-	// Commit transaction
-	err = tx.Commit(ctx)
-	if err != nil {
-		return dtos.TokenResponseDto{}, exc.DbGenericError()
-	}
-
-	// Return token
+	// Return tokens
 	return dtos.TokenResponseDto{
 		Token:        token,
 		RefreshToken: refreshToken.Token,

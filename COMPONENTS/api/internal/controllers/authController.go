@@ -36,7 +36,20 @@ func (h *AuthController) Register(c echo.Context) error {
 
 // Handles user login.
 func (h *AuthController) Login(c echo.Context) error {
-	return nil
+	loginRequest := &dtos.LoginRequestDto{}
+	if err := c.Bind(&loginRequest); err != nil {
+		return err
+	}
+	if err := c.Validate(loginRequest); err != nil {
+		return err
+	}
+
+	tokenResponse, err := h.authService.Login(*loginRequest)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(200, tokenResponse)
 }
 
 // Handles token refresh.

@@ -21,4 +21,5 @@ func (s *Server) loadRoutes() {
 	authController := controllers.NewAuthController(authService)
 	authGroup := g.Group("/auth")
 	authGroup.POST("/register", authController.Register)
+	authGroup.POST("/login", authController.Login)
 }
