@@ -62,6 +62,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/echo.HTTPError"
                         }
                     },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/echo.HTTPError"
+                        }
+                    },
                     "500": {
                         "description": "Internal server error",
                         "schema": {

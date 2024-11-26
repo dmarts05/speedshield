@@ -11,12 +11,6 @@ RUN go mod download
 # Copy the source code
 COPY . .
 
-# Install swag for generating API documentation
-RUN go install github.com/swaggo/swag/cmd/swag@latest
-
-# Generate API documentation
-RUN swag init -d "cmd,pkg/controllers" -pd
-
 # Development stage: adds air for live-reloading and delve for debugging
 FROM base AS development
 

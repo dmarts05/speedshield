@@ -60,6 +60,7 @@ func (h *AuthController) Register(c echo.Context) error {
 //	@Success		200				{object}	dtos.TokenResponseDto	"JWT token and refresh token"
 //	@Failure		400				{object}	echo.HTTPError			"Invalid request"
 //	@Failure		401				{object}	echo.HTTPError			"Invalid credentials"
+//	@Failure		404				{object}	echo.HTTPError			"User not found"
 //	@Failure		500				{object}	echo.HTTPError			"Internal server error"
 //	@Router			/auth/login [post]
 func (h *AuthController) Login(c echo.Context) error {
