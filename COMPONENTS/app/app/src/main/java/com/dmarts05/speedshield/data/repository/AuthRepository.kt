@@ -18,24 +18,28 @@ import javax.inject.Inject
 class AuthRepository @Inject constructor(private val authApi: AuthApi) : BaseRepository() {
     fun register(registerRequestDto: RegisterRequestDto): Flow<NetworkResult<TokenResponseDto>> {
         return flow {
+            emit(NetworkResult.Loading())
             emit(safeApiCall { authApi.register(registerRequestDto) })
         }.flowOn(Dispatchers.IO)
     }
 
     fun login(loginRequestDto: LoginRequestDto): Flow<NetworkResult<TokenResponseDto>> {
         return flow {
+            emit(NetworkResult.Loading())
             emit(safeApiCall { authApi.login(loginRequestDto) })
         }.flowOn(Dispatchers.IO)
     }
 
     fun refresh(refreshRequestDto: RefreshRequestDto): Flow<NetworkResult<TokenResponseDto>> {
         return flow {
+            emit(NetworkResult.Loading())
             emit(safeApiCall { authApi.refresh(refreshRequestDto) })
         }.flowOn(Dispatchers.IO)
     }
 
     fun logout(refreshRequestDto: LogoutRequestDto): Flow<NetworkResult<Unit>> {
         return flow {
+            emit(NetworkResult.Loading())
             emit(safeApiCall { authApi.logout(refreshRequestDto) })
         }.flowOn(Dispatchers.IO)
     }

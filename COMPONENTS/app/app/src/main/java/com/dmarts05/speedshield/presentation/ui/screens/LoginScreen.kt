@@ -74,6 +74,7 @@ fun Login(modifier: Modifier = Modifier, viewModel: LoginViewModel) {
 
         // Handle login response
         loginResponse?.let { response ->
+            Spacer(modifier = Modifier.height(16.dp))
             when (response) {
                 is NetworkResult.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
