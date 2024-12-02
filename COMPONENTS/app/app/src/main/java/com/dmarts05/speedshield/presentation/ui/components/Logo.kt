@@ -1,4 +1,4 @@
-package com.dmarts05.speedshield.ui.components
+package com.dmarts05.speedshield.presentation.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme

@@ -1,4 +1,4 @@
-package com.dmarts05.speedshield.ui.components
+package com.dmarts05.speedshield.presentation.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions

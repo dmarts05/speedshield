@@ -1,6 +1,5 @@
-package com.dmarts05.speedshield.ui.theme
+package com.dmarts05.speedshield.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

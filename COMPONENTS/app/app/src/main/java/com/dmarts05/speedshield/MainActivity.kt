@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dmarts05.speedshield.ui.login.LoginScreen
-import com.dmarts05.speedshield.ui.theme.SpeedshieldTheme
+import com.dmarts05.speedshield.presentation.ui.screens.LoginScreen
+import com.dmarts05.speedshield.presentation.ui.theme.SpeedshieldTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

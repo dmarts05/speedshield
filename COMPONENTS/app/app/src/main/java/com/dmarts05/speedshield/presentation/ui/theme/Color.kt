@@ -1,4 +1,4 @@
-package com.dmarts05.speedshield.ui.theme
+package com.dmarts05.speedshield.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
