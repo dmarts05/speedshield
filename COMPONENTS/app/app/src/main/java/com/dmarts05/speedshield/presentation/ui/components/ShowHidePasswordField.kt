@@ -8,8 +8,8 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,11 +26,11 @@ fun ShowHidePasswordField(
     password: String,
     extraKeyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     extraKeyboardActions: KeyboardActions = KeyboardActions.Default,
-    onTextFieldChanged: (String) -> Unit
+    onTextFieldChanged: (String) -> Unit,
 ) {
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
 
-    TextField(
+    OutlinedTextField(
         value = password,
         onValueChange = { onTextFieldChanged(it) },
         placeholder = { Text(text = "Password") },
@@ -54,7 +54,7 @@ fun ShowHidePasswordField(
 @Composable
 private fun SwitchPasswordVisibilityBtn(
     isPasswordVisible: Boolean,
-    onPasswordVisibilityChanged: () -> Unit
+    onPasswordVisibilityChanged: () -> Unit,
 ) {
     IconButton(onClick = { onPasswordVisibilityChanged() }) {
         Icon(

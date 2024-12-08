@@ -10,22 +10,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
-fun EmailField(
-    email: String,
+fun GenericTextField(
+    value: String,
+    placeholderText: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
     extraKeyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     extraKeyboardActions: KeyboardActions = KeyboardActions.Default,
     onTextFieldChanged: (String) -> Unit,
 ) {
     OutlinedTextField(
-        value = email, onValueChange = { onTextFieldChanged(it) },
+        value = value,
+        onValueChange = { onTextFieldChanged(it) },
         modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(text = "Email") },
+        placeholder = { Text(text = placeholderText) },
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email
+            keyboardType = keyboardType
         ).merge(extraKeyboardOptions),
         keyboardActions = extraKeyboardActions,
         singleLine = true,
         maxLines = 1,
-
-        )
+    )
 }

@@ -41,7 +41,10 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
         Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
     fun login() = viewModelScope.launch {
-        val loginRequestDto = LoginRequestDto(email.value!!, password.value!!)
+        val loginRequestDto = LoginRequestDto(
+            email = email.value!!,
+            password = password.value!!,
+        )
         authRepository.login(loginRequestDto).collect {
             _loginResponse.value = it
             it.data?.let { tokenResponseDto ->

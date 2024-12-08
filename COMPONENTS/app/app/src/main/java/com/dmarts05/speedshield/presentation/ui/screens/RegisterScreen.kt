@@ -17,35 +17,37 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dmarts05.speedshield.data.network.NetworkResult
 import com.dmarts05.speedshield.presentation.ui.components.EmailField
+import com.dmarts05.speedshield.presentation.ui.components.GenericTextField
 import com.dmarts05.speedshield.presentation.ui.components.Logo
 import com.dmarts05.speedshield.presentation.ui.components.ShowHidePasswordField
-import com.dmarts05.speedshield.presentation.viewmodel.LoginViewModel
+import com.dmarts05.speedshield.presentation.viewmodel.RegisterViewModel
 
 @Composable
-fun LoginScreen(
+fun RegisterScreen(
     modifier: Modifier = Modifier,
     navigateToHome: () -> Unit,
-    navigateToRegister: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel<LoginViewModel>(),
+    navigateToLogin: () -> Unit,
+    viewModel: RegisterViewModel = hiltViewModel<RegisterViewModel>(),
 ) {
     Box(
         modifier = modifier
     ) {
-        Login(Modifier.align(Alignment.Center), viewModel, navigateToHome, navigateToRegister)
+        Register(Modifier.align(Alignment.Center), viewModel, navigateToHome, navigateToLogin)
     }
 }
 
 @Composable
-private fun Login(
+private fun Register(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel,
+    viewModel: RegisterViewModel,
     navigateToHome: () -> Unit,
-    navigateToRegister: () -> Unit,
+    navigateToLogin: () -> Unit,
 ) {
+    val username: String by viewModel.username.observeAsState(initial = "")
     val email: String by viewModel.email.observeAsState(initial = "")
     val password: String by viewModel.password.observeAsState(initial = "")
-    val isLoginEnabled: Boolean by viewModel.isLoginEnabled.observeAsState(initial = false)
-    val loginResponse by viewModel.loginResponse.observeAsState()
+    val isRegisterEnabled: Boolean by viewModel.isRegisterEnabled.observeAsState(initial = false)
+    val registerResponse by viewModel.registerResponse.observeAsState()
 
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -61,13 +63,25 @@ private fun Login(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            // Username Field
+            GenericTextField(
+                value = username,
+                placeholderText = "Username",
+                extraKeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                extraKeyboardActions = KeyboardActions(onNext = {
+                    focusManager.moveFocus(
+                        FocusDirection.Down
+                    )
+                }),
+                onTextFieldChanged = { viewModel.onRegisterChanged(it, email, password) }
+            )
             EmailField(
                 email = email,
                 extraKeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 extraKeyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
-                onTextFieldChanged = { viewModel.onLoginChanged(it, password) }
+                onTextFieldChanged = { viewModel.onRegisterChanged(username, it, password) }
             )
             ShowHidePasswordField(
                 password = password,
@@ -75,31 +89,33 @@ private fun Login(
                 extraKeyboardActions = KeyboardActions(
                     onDone = {
                         focusManager.clearFocus()
-                        if (isLoginEnabled) {
-                            viewModel.login()
+                        if (isRegisterEnabled) {
+                            viewModel.register()
                         }
                     }
                 ),
-                onTextFieldChanged = { viewModel.onLoginChanged(email, it) }
+                onTextFieldChanged = { viewModel.onRegisterChanged(username, email, it) }
             )
         }
-        LoginBtn(isLoginEnabled = isLoginEnabled, onLoginSelected = { viewModel.login() })
+        RegisterBtn(
+            isRegisterEnabled = isRegisterEnabled,
+            onRegisterSelected = { viewModel.register() })
         TextButton(
-            onClick = navigateToRegister,
+            onClick = navigateToLogin,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text(text = "Don't have an account? Register here.")
+            Text(text = "Already have an account? Log in here.")
         }
 
-        // Handle login response
-        loginResponse?.let { response ->
+        // Handle register response
+        registerResponse?.let { response ->
             when (response) {
                 is NetworkResult.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
 
                 is NetworkResult.Success -> {
-                    Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Registration Successful!", Toast.LENGTH_SHORT).show()
                     navigateToHome()
                 }
 
@@ -112,14 +128,14 @@ private fun Login(
 }
 
 @Composable
-private fun LoginBtn(isLoginEnabled: Boolean, onLoginSelected: () -> Unit) {
+private fun RegisterBtn(isRegisterEnabled: Boolean, onRegisterSelected: () -> Unit) {
     Button(
-        onClick = { onLoginSelected() },
+        onClick = { onRegisterSelected() },
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp),
-        enabled = isLoginEnabled
+        enabled = isRegisterEnabled
     ) {
-        Text(text = "Log in")
+        Text(text = "Register")
     }
 }
