@@ -1,6 +1,5 @@
 package com.dmarts05.speedshield.presentation.viewmodel
 
-import android.util.Log
 import android.util.Patterns
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,12 +9,16 @@ import com.dmarts05.speedshield.data.model.LoginRequestDto
 import com.dmarts05.speedshield.data.model.TokenResponseDto
 import com.dmarts05.speedshield.data.network.NetworkResult
 import com.dmarts05.speedshield.data.repository.AuthRepository
+import com.dmarts05.speedshield.data.service.TokenService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val authRepository: AuthRepository) : ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val tokenService: TokenService,
+) : ViewModel() {
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
 
@@ -48,9 +51,7 @@ class LoginViewModel @Inject constructor(private val authRepository: AuthReposit
         authRepository.login(loginRequestDto).collect {
             _loginResponse.value = it
             it.data?.let { tokenResponseDto ->
-                // Print tokens for now
-                Log.d("LoginViewModel", "Token: ${tokenResponseDto.token}")
-                Log.d("LoginViewModel", "Refresh Token: ${tokenResponseDto.refreshToken}")
+                tokenService.storeTokens(tokenResponseDto.token, tokenResponseDto.refreshToken)
             }
         }
     }
