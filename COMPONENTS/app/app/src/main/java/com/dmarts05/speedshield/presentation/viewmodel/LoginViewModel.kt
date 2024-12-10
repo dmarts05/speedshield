@@ -9,7 +9,7 @@ import com.dmarts05.speedshield.data.model.LoginRequestDto
 import com.dmarts05.speedshield.data.model.TokenResponseDto
 import com.dmarts05.speedshield.data.network.NetworkResult
 import com.dmarts05.speedshield.data.repository.AuthRepository
-import com.dmarts05.speedshield.data.service.TokenService
+import com.dmarts05.speedshield.data.service.TokenDataStoreService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -17,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val tokenService: TokenService,
+    private val tokenDataStoreService: TokenDataStoreService,
 ) : ViewModel() {
     private val _email = MutableLiveData<String>()
     val email: LiveData<String> = _email
@@ -51,7 +51,10 @@ class LoginViewModel @Inject constructor(
         authRepository.login(loginRequestDto).collect {
             _loginResponse.value = it
             it.data?.let { tokenResponseDto ->
-                tokenService.storeTokens(tokenResponseDto.token, tokenResponseDto.refreshToken)
+                tokenDataStoreService.storeTokens(
+                    tokenResponseDto.token,
+                    tokenResponseDto.refreshToken
+                )
             }
         }
     }

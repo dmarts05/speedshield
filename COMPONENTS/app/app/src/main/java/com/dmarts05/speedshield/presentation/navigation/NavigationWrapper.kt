@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dmarts05.speedshield.data.service.TokenService
+import com.dmarts05.speedshield.data.service.TokenDataStoreService
 import com.dmarts05.speedshield.presentation.ui.screens.HomeScreen
 import com.dmarts05.speedshield.presentation.ui.screens.LandingPageScreen
 import com.dmarts05.speedshield.presentation.ui.screens.LoginScreen
@@ -18,10 +18,10 @@ import com.dmarts05.speedshield.presentation.ui.screens.RegisterScreen
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 
-class NavigationWrapper @Inject constructor(private val tokenService: TokenService) {
+class NavigationWrapper @Inject constructor(private val tokenDataStoreService: TokenDataStoreService) {
     @Composable
     fun Component() {
-        val isAuthenticated = runBlocking { tokenService.isAuthenticated() }
+        val isAuthenticated = runBlocking { tokenDataStoreService.isAuthenticated() }
         val navController = rememberNavController()
         LandingScaffold { baseModifier ->
             NavHost(

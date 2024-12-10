@@ -1,6 +1,6 @@
 package com.dmarts05.speedshield.data.network
 
-import com.dmarts05.speedshield.data.service.TokenService
+import com.dmarts05.speedshield.data.service.TokenDataStoreService
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Request
@@ -8,7 +8,7 @@ import okhttp3.Response
 import javax.inject.Inject
 
 class AuthInterceptor @Inject constructor(
-    private val tokenService: TokenService,
+    private val tokenDataStoreService: TokenDataStoreService,
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -17,7 +17,7 @@ class AuthInterceptor @Inject constructor(
         // Retrieve the token synchronously
         val token: String? = runBlocking {
             try {
-                tokenService.getToken()
+                tokenDataStoreService.getToken()
             } catch (e: IllegalArgumentException) {
                 null
             }

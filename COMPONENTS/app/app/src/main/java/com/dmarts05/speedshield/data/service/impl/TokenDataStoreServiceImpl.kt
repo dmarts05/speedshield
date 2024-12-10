@@ -4,14 +4,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.dmarts05.speedshield.data.service.TokenService
+import com.dmarts05.speedshield.data.service.TokenDataStoreService
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
-class TokenServiceImpl @Inject constructor(
+class TokenDataStoreServiceImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
-) : TokenService {
+) : TokenDataStoreService {
     companion object {
         val TOKEN = stringPreferencesKey("token")
         val REFRESH_TOKEN = stringPreferencesKey("refresh_token")

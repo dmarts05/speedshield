@@ -1,6 +1,6 @@
 package com.dmarts05.speedshield.data.service
 
-interface TokenService {
+interface TokenDataStoreService {
     suspend fun isAuthenticated(): Boolean
     suspend fun storeTokens(token: String, refreshToken: String)
     suspend fun getToken(): String
