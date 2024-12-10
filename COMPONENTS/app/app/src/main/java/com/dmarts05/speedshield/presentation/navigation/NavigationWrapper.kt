@@ -15,9 +15,10 @@ import com.dmarts05.speedshield.presentation.ui.screens.HomeScreen
 import com.dmarts05.speedshield.presentation.ui.screens.LandingPageScreen
 import com.dmarts05.speedshield.presentation.ui.screens.LoginScreen
 import com.dmarts05.speedshield.presentation.ui.screens.RegisterScreen
+import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
 
-class NavigationWrapper(private val tokenService: TokenService) {
+class NavigationWrapper @Inject constructor(private val tokenService: TokenService) {
     @Composable
     fun Component() {
         val isAuthenticated = runBlocking { tokenService.isAuthenticated() }
@@ -27,36 +28,33 @@ class NavigationWrapper(private val tokenService: TokenService) {
                 navController = navController,
                 startDestination = if (!isAuthenticated) LandingPage else Home
             ) {
-                if (!isAuthenticated) {
-                    composable<LandingPage> {
-                        LandingPageScreen(
-                            modifier = baseModifier,
-                            navigateToLogin = { navigateToLogin(navController) },
-                            navigateToRegister = { navigateToRegister(navController) }
-                        )
-                    }
-
-                    composable<Login> {
-                        LoginScreen(
-                            modifier = baseModifier,
-                            navigateToHome = { navigateToHome(navController) },
-                            navigateToRegister = { navigateToRegister(navController) }
-                        )
-                    }
-
-                    composable<Register> {
-                        RegisterScreen(
-                            modifier = baseModifier,
-                            navigateToHome = { navigateToHome(navController) },
-                            navigateToLogin = { navigateToLogin(navController) }
-                        )
-                    }
-                } else {
-                    composable<Home> {
-                        HomeScreen()
-                    }
+                composable<LandingPage> {
+                    LandingPageScreen(
+                        modifier = baseModifier,
+                        navigateToLogin = { navigateToLogin(navController) },
+                        navigateToRegister = { navigateToRegister(navController) }
+                    )
                 }
 
+                composable<Login> {
+                    LoginScreen(
+                        modifier = baseModifier,
+                        navigateToHome = { navigateToHome(navController) },
+                        navigateToRegister = { navigateToRegister(navController) }
+                    )
+                }
+
+                composable<Register> {
+                    RegisterScreen(
+                        modifier = baseModifier,
+                        navigateToHome = { navigateToHome(navController) },
+                        navigateToLogin = { navigateToLogin(navController) }
+                    )
+                }
+
+                composable<Home> {
+                    HomeScreen()
+                }
             }
         }
     }
