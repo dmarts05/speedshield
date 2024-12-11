@@ -13,3 +13,9 @@ object Register
 
 @Serializable
 object Home
+
+@Serializable
+object Settings
+
+@Serializable
+object Donate

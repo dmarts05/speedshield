@@ -2,58 +2,79 @@ package com.dmarts05.speedshield.presentation.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dmarts05.speedshield.data.service.TokenDataStoreService
-import com.dmarts05.speedshield.presentation.ui.screens.HomeScreen
-import com.dmarts05.speedshield.presentation.ui.screens.LandingPageScreen
-import com.dmarts05.speedshield.presentation.ui.screens.LoginScreen
-import com.dmarts05.speedshield.presentation.ui.screens.RegisterScreen
+import com.dmarts05.speedshield.presentation.ui.screens.*
 import jakarta.inject.Inject
 import kotlinx.coroutines.runBlocking
+
 
 class NavigationWrapper @Inject constructor(private val tokenDataStoreService: TokenDataStoreService) {
     @Composable
     fun Component() {
         val isAuthenticated = runBlocking { tokenDataStoreService.isAuthenticated() }
         val navController = rememberNavController()
-        LandingScaffold { baseModifier ->
-            NavHost(
-                navController = navController,
-                startDestination = if (!isAuthenticated) LandingPage else Home
-            ) {
-                composable<LandingPage> {
+        NavHost(
+            navController = navController,
+            startDestination = if (!isAuthenticated) LandingPage else Home
+        ) {
+            // Landing, Login, and Register Screens inside LandingScaffold
+            composable<LandingPage> {
+                LandingScaffold { baseModifier ->
                     LandingPageScreen(
                         modifier = baseModifier,
                         navigateToLogin = { navigateToLogin(navController) },
                         navigateToRegister = { navigateToRegister(navController) }
                     )
                 }
+            }
 
-                composable<Login> {
+            composable<Login> {
+                LandingScaffold { baseModifier ->
                     LoginScreen(
                         modifier = baseModifier,
                         navigateToHome = { navigateToHome(navController) },
                         navigateToRegister = { navigateToRegister(navController) }
                     )
                 }
+            }
 
-                composable<Register> {
+            composable<Register> {
+                LandingScaffold { baseModifier ->
                     RegisterScreen(
                         modifier = baseModifier,
                         navigateToHome = { navigateToHome(navController) },
                         navigateToLogin = { navigateToLogin(navController) }
                     )
                 }
+            }
 
-                composable<Home> {
-                    HomeScreen()
+            // AppScaffold for other screens with bottom navigation bar
+            composable<Home> {
+                AppScaffold(navController) { baseModifier ->
+                    HomeScreen(baseModifier)
+                }
+            }
+
+            composable<Settings> {
+                AppScaffold(navController) { baseModifier ->
+                    SettingsScreen(baseModifier)
+                }
+            }
+
+            composable<Donate> {
+                AppScaffold(navController) { baseModifier ->
+                    DonateScreen(baseModifier)
                 }
             }
         }
@@ -61,7 +82,7 @@ class NavigationWrapper @Inject constructor(private val tokenDataStoreService: T
 
     @Composable
     private fun LandingScaffold(content: @Composable (Modifier) -> Unit) {
-        return Scaffold(
+        Scaffold(
             content = { innerPadding ->
                 val modifier = Modifier
                     .fillMaxSize()
@@ -69,6 +90,63 @@ class NavigationWrapper @Inject constructor(private val tokenDataStoreService: T
                 content(modifier)
             }
         )
+    }
+
+    @Composable
+    private fun AppScaffold(
+        navController: NavController,
+        content: @Composable (Modifier) -> Unit,
+    ) {
+        Scaffold(
+            bottomBar = {
+                BottomBar(navController)
+            },
+            content = { innerPadding ->
+                val modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp, 16.dp, 16.dp, innerPadding.calculateBottomPadding())
+                content(modifier)
+            }
+        )
+    }
+
+    @Composable
+    private fun BottomBar(navController: NavController) {
+        NavigationBar {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
+            APP_DESTINATION_ITEMS.forEach { destination ->
+                val destinationRoute = destination.route::class.qualifiedName
+                val selected =
+                    currentDestination?.hierarchy?.any { it.route == destinationRoute } == true
+
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            imageVector = if (selected) destination.iconSelected else destination.iconUnselected,
+                            contentDescription = destination.name
+                        )
+                    },
+                    label = { Text(destination.name) },
+                    selected = selected,
+                    onClick = {
+                        navController.navigate(destination.route) {
+                            // Pop up to the start destination of the graph to
+                            // avoid building up a large stack of destinations
+                            // on the back stack as users select items
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            // Avoid multiple copies of the same destination when
+                            // reselecting the same item
+                            launchSingleTop = true
+                            // Restore state when reselecting a previously selected item
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
     }
 
     private fun navigateToLogin(navController: NavController) {
@@ -85,9 +163,7 @@ class NavigationWrapper @Inject constructor(private val tokenDataStoreService: T
 
     private fun navigateToHome(navController: NavController) {
         navController.navigate(Home) {
-            // Clear the back stack to prevent the user from going back to the login or register screen
             popUpTo(0) { inclusive = false }
         }
     }
 }
-
