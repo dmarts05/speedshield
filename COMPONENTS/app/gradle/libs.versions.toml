@@ -7,20 +7,21 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.11.00"
+composeBom = "2024.12.01"
 lifecycleLivedataKtx = "2.8.7"
-runtimeLivedata = "1.7.5"
-materialIconsExtended = "1.7.5"
+runtimeLivedata = "1.7.6"
+materialIconsExtended = "1.7.6"
 hilt = "2.53.1"
 ksp = "2.0.21-1.0.28"
 hiltNavigationCompose = "1.2.0"
 retrofit = "2.11.0"
 converterGson = "2.11.0"
-navigationCompose = "2.8.4"
+navigationCompose = "2.8.5"
 kotlinxSerializationJson = "1.7.3"
 datastorePreferences = "1.1.1"
 securityCryptoDatastorePreferences = "1.1.1-beta03"
 securityCryptoKtx = "1.1.0-alpha06"
+mapbox = "11.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,6 +51,8 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 security-crypto-datastore-preferences = { group = "io.github.osipxd", name = "security-crypto-datastore-preferences", version.ref = "securityCryptoDatastorePreferences" }
 androidx-security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
+mapbox-maps-android = { group = "com.mapbox.maps", name = "android", version.ref = "mapbox" }
+mapbox-maps-compose = { group = "com.mapbox.extension", name = "maps-compose", version.ref = "mapbox" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

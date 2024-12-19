@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.security.crypto.datastore.preferences)
     implementation(libs.androidx.security.crypto.ktx)
+    implementation(libs.mapbox.maps.android)
+    implementation(libs.mapbox.maps.compose)
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,9 +1,14 @@
 package com.dmarts05.speedshield.presentation.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -61,7 +66,7 @@ class NavigationWrapper @Inject constructor(private val tokenDataStoreService: T
 
             // AppScaffold for other screens with bottom navigation bar
             composable<Home> {
-                AppScaffold(navController) { baseModifier ->
+                NavScaffold(navController) { baseModifier ->
                     HomeScreen(baseModifier)
                 }
             }
@@ -84,9 +89,11 @@ class NavigationWrapper @Inject constructor(private val tokenDataStoreService: T
     private fun LandingScaffold(content: @Composable (Modifier) -> Unit) {
         Scaffold(
             content = { innerPadding ->
-                val modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 16.dp, 16.dp, innerPadding.calculateBottomPadding())
+                val modifier = remember {
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp, 16.dp, 16.dp, innerPadding.calculateBottomPadding())
+                }
                 content(modifier)
             }
         )
@@ -102,10 +109,53 @@ class NavigationWrapper @Inject constructor(private val tokenDataStoreService: T
                 BottomBar(navController)
             },
             content = { innerPadding ->
-                val modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 16.dp, 16.dp, innerPadding.calculateBottomPadding())
+                val modifier = remember {
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp, 16.dp, 16.dp, innerPadding.calculateBottomPadding())
+                }
                 content(modifier)
+            }
+        )
+    }
+
+    @Composable
+    private fun NavScaffold(
+        navController: NavController,
+        content: @Composable (Modifier) -> Unit,
+    ) {
+        Scaffold(
+            bottomBar = {
+                BottomBar(navController)
+            },
+            content = { innerPadding ->
+                val modifier = remember {
+                    Modifier
+                        .fillMaxSize()
+                        .padding(0.dp, innerPadding.calculateTopPadding(), 0.dp, 0.dp)
+                }
+                Box(modifier) {
+                    content(modifier)
+                    FloatingActionButton(
+                        onClick = {
+                            // TODO
+                        },
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(
+                                0.dp,
+                                0.dp,
+                                0.dp,
+                                innerPadding.calculateBottomPadding() + 16.dp
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = "Start Speedshield",
+                        )
+                    }
+                }
             }
         )
     }

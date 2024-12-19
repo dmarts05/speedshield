@@ -19,7 +19,7 @@ class TokenAuthenticator @Inject constructor(
 ) : Authenticator {
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        val originalRequest = response.request()
+        val originalRequest = response.request
 
         // Do not retry more than once
         if (responseCount(response) >= 2) {
@@ -61,10 +61,10 @@ class TokenAuthenticator @Inject constructor(
 
     private fun responseCount(response: Response): Int {
         var count = 1
-        var priorResponse = response.priorResponse()
+        var priorResponse = response.priorResponse
         while (priorResponse != null) {
             count++
-            priorResponse = priorResponse.priorResponse()
+            priorResponse = priorResponse.priorResponse
         }
         return count
     }
